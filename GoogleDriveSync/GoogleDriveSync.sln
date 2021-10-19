@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31112.23
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleDriveSync", "GoogleDriveSync.csproj", "{4FB943AB-371A-48FC-9517-B0B1B9AC22C0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4FB943AB-371A-48FC-9517-B0B1B9AC22C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FB943AB-371A-48FC-9517-B0B1B9AC22C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FB943AB-371A-48FC-9517-B0B1B9AC22C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FB943AB-371A-48FC-9517-B0B1B9AC22C0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B313D687-ED6F-40A2-9D86-E79ED08E82C8}
+	EndGlobalSection
+EndGlobal
