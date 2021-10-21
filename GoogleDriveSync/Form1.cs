@@ -46,29 +46,29 @@ namespace GoogleDriveSync
                 ApplicationName = ApplicationName,
             });
 
-            var watcher = new FileSystemWatcher(@"E:\work\LocalDrive");
+            //var watcher = new FileSystemWatcher(@"E:\work\LocalDrive");
 
-            watcher.NotifyFilter = NotifyFilters.Attributes
-                                 | NotifyFilters.CreationTime
-                                 | NotifyFilters.DirectoryName
-                                 | NotifyFilters.FileName
-                                 | NotifyFilters.LastAccess
-                                 | NotifyFilters.LastWrite
-                                 | NotifyFilters.Security
-                                 | NotifyFilters.Size;
+            //watcher.NotifyFilter = NotifyFilters.Attributes
+            //                     | NotifyFilters.CreationTime
+            //                     | NotifyFilters.DirectoryName
+            //                     | NotifyFilters.FileName
+            //                     | NotifyFilters.LastAccess
+            //                     | NotifyFilters.LastWrite
+            //                     | NotifyFilters.Security
+            //                     | NotifyFilters.Size;
 
-            watcher.Changed += OnChanged;
-            watcher.Created += OnCreated;
-            watcher.Deleted += OnDeleted;
-            watcher.Renamed += OnRenamed;
+            //watcher.Changed += OnChanged;
+            //watcher.Created += OnCreated;
+            //watcher.Deleted += OnDeleted;
+            //watcher.Renamed += OnRenamed;
 
 
 
-            watcher.IncludeSubdirectories = true;
-            watcher.EnableRaisingEvents = true;
+            //watcher.IncludeSubdirectories = true;
+            //watcher.EnableRaisingEvents = true;
 
-            Console.WriteLine("Press enter to exit.");
-            Console.ReadLine();
+            //Console.WriteLine("Press enter to exit.");
+            //Console.ReadLine();
 
 
 
@@ -182,7 +182,6 @@ namespace GoogleDriveSync
             request = service.Files.Create(FileMetaData);
             request.Fields = "id";
             var file = request.Execute();
-            Console.WriteLine(file.Id.ToString());
         }
 
         public  void uploadFile(DriveService service, string _uploadFile)
@@ -285,6 +284,94 @@ namespace GoogleDriveSync
             return mimeType;
         }
 
+        private void button2_Click(object sender, EventArgs e)
+        {
+        
+            var response = service.Changes.GetStartPageToken().Execute();
+            Console.WriteLine("Start token: " + response.StartPageTokenValue);
 
+            string pageToken = response.StartPageTokenValue;
+            while (pageToken != null)
+            {
+                var request = service.Changes.List(pageToken);
+                request.Spaces = "drive";
+                var changes = request.Execute();
+                foreach (var change in changes.Changes)
+                {
+                    // Process change
+                    //listBox1.Items.Add("Change found for file: " + change.File.Name.ToString());
+                    Console.WriteLine("Change found for file: " + change.FileId);
+                    Console.WriteLine("Change found for file: " + change.ChangeType + "for " + change.File.Name);
+                    DownloadFile(service, change.File, @"E:\work\LocalDrive");
+                }
+                if (changes.NewStartPageToken != null)
+                {
+                    // Last page, save this token for the next polling interval
+                    pageToken = changes.NewStartPageToken;
+
+                }
+                pageToken = changes.NextPageToken;
+                
+            }
+
+            
+
+
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+        private  void DownloadFile(Google.Apis.Drive.v3.DriveService service, Google.Apis.Drive.v3.Data.File file, string saveTo)
+        {
+
+            var request = service.Files.Get(file.Id);
+            var stream = new System.IO.MemoryStream();
+
+            // Add a handler which will be notified on progress changes.
+            // It will notify on each chunk download and when the
+            // download is completed or failed.
+            request.MediaDownloader.ProgressChanged += (Google.Apis.Download.IDownloadProgress progress) =>
+            {
+                switch (progress.Status)
+                {
+                    case Google.Apis.Download.DownloadStatus.Downloading:
+                        {
+                            Console.WriteLine(progress.BytesDownloaded);
+                            break;
+                        }
+                    case Google.Apis.Download.DownloadStatus.Completed:
+                        {
+                            Console.WriteLine("Download complete.");
+                            SaveStream(stream, saveTo);
+                            break;
+                        }
+                    case Google.Apis.Download.DownloadStatus.Failed:
+                        {
+                            Console.WriteLine("Download failed.");
+                            break;
+                        }
+                }
+            };
+            request.Download(stream);
+
+        }
+        private static void SaveStream(System.IO.MemoryStream stream, string saveTo)
+        {
+            using (System.IO.FileStream file = new System.IO.FileStream(saveTo, System.IO.FileMode.Create, System.IO.FileAccess.Write))
+            {
+                stream.WriteTo(file);
+            }
+        }
     }
 }
