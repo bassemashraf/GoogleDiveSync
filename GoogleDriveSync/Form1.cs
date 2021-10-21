@@ -46,7 +46,7 @@ namespace GoogleDriveSync
                 ApplicationName = ApplicationName,
             });
 
-            var watcher = new FileSystemWatcher(@"D:\LiveRepReportsWithSSIS\SBS\LocalDrive");
+            var watcher = new FileSystemWatcher(@"E:\work\LocalDrive");
 
             watcher.NotifyFilter = NotifyFilters.Attributes
                                  | NotifyFilters.CreationTime
@@ -148,7 +148,8 @@ namespace GoogleDriveSync
             string value = $"Created: {e.FullPath}";
             Console.WriteLine(value);
             Console.WriteLine(GetMimeType(e.FullPath));
-           uploadFile(service, e.FullPath);
+           //uploadFile(service, e.FullPath);
+            createnewfolder(service, e.FullPath);
         }
 
         private static void OnDeleted(object sender, FileSystemEventArgs e) =>
@@ -160,23 +161,55 @@ namespace GoogleDriveSync
             Console.WriteLine($"    Old: {e.OldFullPath}");
             Console.WriteLine($"    New: {e.FullPath}");
         }
-       
-        
+
+
+
+
+
+        public void createnewfolder(DriveService service, string _uploadFile)
+        {
+          
+
+            Google.Apis.Drive.v3.Data.File FileMetaData = new Google.Apis.Drive.v3.Data.File();
+            FileMetaData.Name = System.IO.Path.GetFileName(_uploadFile);
+            FileMetaData.MimeType = "application/vnd.google-apps.folder";
+            FileMetaData.Parents = new List<string>
+                {
+                   "1aNidvO2hxTqsSN-_7QKYz4CAZTdTJ3Kd"
+                };
+            Google.Apis.Drive.v3.FilesResource.CreateRequest request;
+
+            request = service.Files.Create(FileMetaData);
+            request.Fields = "id";
+            var file = request.Execute();
+            Console.WriteLine(file.Id.ToString());
+        }
+
         public  void uploadFile(DriveService service, string _uploadFile)
         {
-            if (System.IO.File.Exists(_uploadFile))
+            if (true)
             {
+                
                 Google.Apis.Drive.v3.Data.File body = new Google.Apis.Drive.v3.Data.File();
                 body.Name = System.IO.Path.GetFileName(_uploadFile);
-                
-                body.MimeType = GetMimeType(_uploadFile);
+
+                body.MimeType = GetMimeType(_uploadFile);//"application/vnd.google-apps.folder";// GetMimeType(_uploadFile);
+                body.Parents = new List<string>
+                {
+                   "1aNidvO2hxTqsSN-_7QKYz4CAZTdTJ3Kd"
+                };
                 try
                 {
-                    var stream = new FileStream(_uploadFile, FileMode.Open, FileAccess.Read);
 
 
-                
-                    var request = service.Files.Create(body, stream, GetMimeType(_uploadFile));
+
+
+                    var stream = new System.IO.FileStream(_uploadFile, System.IO.FileMode.Open);
+                                        //var stream = new FileStream(_uploadFile, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+
+
+
+                     var request = service.Files.Create(body, stream, GetMimeType(_uploadFile));
                     request.Fields = "*";
                     // You can bind event handler with progress changed event and response recieved(completed event)
                  
@@ -189,7 +222,7 @@ namespace GoogleDriveSync
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.Message, "Error Occured");
+                    Console.WriteLine(e.Message+"Error Occured");
                    
                 }
             }
@@ -244,7 +277,7 @@ namespace GoogleDriveSync
 
         private string GetMimeType(string fileName)
         {
-            string mimeType = "application/unknown";
+            string mimeType = "application /unknown";
             string ext = System.IO.Path.GetExtension(fileName).ToLower();
             Microsoft.Win32.RegistryKey regKey = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(ext);
             if (regKey != null && regKey.GetValue("Content Type") != null)
