@@ -46,7 +46,7 @@ namespace GoogleDriveSync
                 ApplicationName = ApplicationName,
             });
 
-            //var watcher = new FileSystemWatcher(@"E:\work\LocalDrive");
+            //var watcher = new FileSystemWatcher(@"D:\LiveRepReportsWithSSIS\SBS\LocalDrive");
 
             //watcher.NotifyFilter = NotifyFilters.Attributes
             //                     | NotifyFilters.CreationTime
@@ -87,69 +87,53 @@ namespace GoogleDriveSync
 
 
 
-           
-            //FilesResource.ListRequest listRequest = service.Files.List();
-            //listRequest.PageSize = 10;
-            //listRequest.Fields = "nextPageToken, files(id, name)";
-            //IList<Google.Apis.Drive.v3.Data.File> files = listRequest.Execute()
-            //   .Files;
-            //Console.WriteLine("Files:");
-            //if (files != null && files.Count > 0)
-            //{
-            //    foreach (var file in files)
-            //    {
-            //        listBox1.Items.Add(file.Name);
-            //    }
-            //}
-            //else
-            //{
-            //    Console.WriteLine("No files found.");
-            //}
 
 
-            //var response = service.Changes.GetStartPageToken().Execute();
-            //Console.WriteLine("Start token: " + response.StartPageTokenValue);
 
-            //string pageToken = response.StartPageTokenValue;
-            //while (pageToken != null)
-            //{
-            //    var request = service.Changes.List(pageToken);
-            //    request.Spaces = "drive";
-            //    var changes = request.Execute();
-            //    foreach (var change in changes.Changes)
-            //    {
-            //        // Process change
-            //        listBox1.Items.Add("Change found for file: " + change.File.Name.ToString());
-            //      //Console.WriteLine("Change found for file: " + change.FileId);
-            //    }
-            //    if (changes.NewStartPageToken != null)
-            //    {
-            //        // Last page, save this token for the next polling interval
-            //        pageToken = changes.NewStartPageToken;
 
-            //    }
-            //    pageToken = changes.NextPageToken;
-            //}
 
 
 
         }
-        private static void OnChanged(object sender, FileSystemEventArgs e)
+        private  void OnChanged(object sender, FileSystemEventArgs e)
         {
             if (e.ChangeType != WatcherChangeTypes.Changed)
             {
+               
                 return;
             }
             Console.WriteLine($"Changed: {e.FullPath}");
+            FileAttributes attr = System.IO.File.GetAttributes(e.FullPath);
+            //detect whether its a directory or file
+            if ((attr & FileAttributes.Directory) != FileAttributes.Directory)
+            {
+                 
+                uploadFile(service, e.FullPath, getperants(e.FullPath)[0]);
+            }
+
+
         }
 
         private  void OnCreated(object sender, FileSystemEventArgs e)
         {
             string value = $"Created: {e.FullPath}";
             Console.WriteLine(value);
-            Console.WriteLine(GetMimeType(e.FullPath));
-           //uploadFile(service, e.FullPath);
-            createnewfolder(service, e.FullPath);
+            //get the file attributes for file or directory
+            FileAttributes attr = System.IO.File.GetAttributes(e.FullPath);
+            //detect whether its a directory or file
+            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+            {
+                createnewfolder(service, e.FullPath, getperants(e.FullPath)[0]);
+                Console.WriteLine(getperants(e.FullPath)[0]);
+            }
+            else
+                uploadFile(service, e.FullPath, getperants(e.FullPath)[0]);
+
+
+            // uploadFile(service, e.FullPath ,getperants(e.FullPath)[0]);
+            // createnewfolder(service, e.FullPath);
+            //uploadFile(service, e.FullPath);
+
         }
 
         private static void OnDeleted(object sender, FileSystemEventArgs e) =>
@@ -166,16 +150,17 @@ namespace GoogleDriveSync
 
 
 
-        public void createnewfolder(DriveService service, string _uploadFile)
+        public void createnewfolder(DriveService service, string _uploadFile , String parentfolder)
         {
-          
+
+            String id = getfolderid(parentfolder);
 
             Google.Apis.Drive.v3.Data.File FileMetaData = new Google.Apis.Drive.v3.Data.File();
             FileMetaData.Name = System.IO.Path.GetFileName(_uploadFile);
-            FileMetaData.MimeType = "application/vnd.google-apps.folder";
+            FileMetaData.MimeType = "application/vnd.google-apps.folder" ;
             FileMetaData.Parents = new List<string>
                 {
-                   "1aNidvO2hxTqsSN-_7QKYz4CAZTdTJ3Kd"
+                   id
                 };
             Google.Apis.Drive.v3.FilesResource.CreateRequest request;
 
@@ -184,22 +169,27 @@ namespace GoogleDriveSync
             var file = request.Execute();
         }
 
-        public  void uploadFile(DriveService service, string _uploadFile)
+        public  void uploadFile(DriveService service, string _uploadFile  ,String parentfolder)
         {
-            if (true)
-            {
-                
-                Google.Apis.Drive.v3.Data.File body = new Google.Apis.Drive.v3.Data.File();
+
+
+
+            String id = getfolderid(parentfolder);
+            
+
+
+            Google.Apis.Drive.v3.Data.File body = new Google.Apis.Drive.v3.Data.File();
                 body.Name = System.IO.Path.GetFileName(_uploadFile);
 
                 body.MimeType = GetMimeType(_uploadFile);//"application/vnd.google-apps.folder";// GetMimeType(_uploadFile);
                 body.Parents = new List<string>
                 {
-                   "1aNidvO2hxTqsSN-_7QKYz4CAZTdTJ3Kd"
+                  id
                 };
                 try
                 {
-
+                  
+                  
 
 
 
@@ -207,29 +197,21 @@ namespace GoogleDriveSync
                                         //var stream = new FileStream(_uploadFile, FileMode.OpenOrCreate, FileAccess.ReadWrite);
 
 
-
+                     
                      var request = service.Files.Create(body, stream, GetMimeType(_uploadFile));
                     request.Fields = "*";
-                    // You can bind event handler with progress changed event and response recieved(completed event)
                  
                     var result =request.Upload();
-                    Console.WriteLine(result.Status.ToString());
+  
                
-
-                    //if (result.Exception.Message )
-                    //Console.WriteLine(result.Exception.Message);
+       
                 }
-                catch (Exception e)
+                catch 
                 {
-                    Console.WriteLine(e.Message+"Error Occured");
+                  
                    
                 }
-            }
-            else
-            {
-                Console.WriteLine("succesyukrjt");
-                
-            }
+          
         }
 
 
@@ -300,9 +282,10 @@ namespace GoogleDriveSync
                 {
                     // Process change
                     //listBox1.Items.Add("Change found for file: " + change.File.Name.ToString());
-                    Console.WriteLine("Change found for file: " + change.FileId);
-                    Console.WriteLine("Change found for file: " + change.ChangeType + "for " + change.File.Name);
-                    DownloadFile(service, change.File, @"E:\work\LocalDrive");
+                    Console.WriteLine("Change found for file: " + change.File);
+                    Console.WriteLine("Change found for file: " + change.File.Parents[0]);
+                    Console.WriteLine("Change found for file: " + change.Type + "for " + change.File.Name);
+                    DownloadFile(service, change.File, @"D:\LiveRepReportsWithSSIS\SBS\LocalDrive\"+change.File.Parents.ToString()+change.File.Name);
                 }
                 if (changes.NewStartPageToken != null)
                 {
@@ -373,5 +356,84 @@ namespace GoogleDriveSync
                 stream.WriteTo(file);
             }
         }
+
+
+
+
+
+        private List<string> getperants( string filepath ) 
+        {
+            List<string> perants= new List<string>();
+            DirectoryInfo di = new DirectoryInfo(filepath);
+            while (true)
+            {
+                di = di.Parent;
+                if (di.Name == "SBS")
+                {
+                   
+                    break;
+                }
+                perants.Add(di.Name);
+            }
+            return perants; 
+        }
+
+
+
+
+
+        private List<string> listfilesfromfolder(String FolderNAme)
+        {
+            FilesResource.ListRequest listRequest = service.Files.List();
+            listRequest.Fields = "nextPageToken, files(id, name)";
+            List<string> folders = new List<string>();
+            string id = getfolderid(FolderNAme);
+
+            listRequest.Q = "mimeType = 'application/vnd.google-apps.folder' and '" + id + "' in parents";
+            IList<Google.Apis.Drive.v3.Data.File> files = listRequest.Execute()
+               .Files;
+            Console.WriteLine("Files:");
+            if (files != null && files.Count > 0)
+            {
+                foreach (var file in files)
+                {
+                    folders.Add(file.Name);
+                }
+            }
+            else
+            {
+                Console.WriteLine("No files found.");
+            }
+
+            return folders;
+        }
+
+
+
+
+        private string getfolderid( string foldername ) 
+        {
+        FilesResource.ListRequest listRequest = service.Files.List();
+        listRequest.Q = "mimeType = 'application/vnd.google-apps.folder' and name = '"+foldername+"'";
+        listRequest.Fields = "nextPageToken, files(id, name)";
+
+        IList<Google.Apis.Drive.v3.Data.File> files = listRequest.Execute()
+        .Files;
+            String id = " ";
+            if (files != null && files.Count > 0)
+            {
+                foreach (var file in files)
+                {   
+                    id = file.Id;
+                }
+            }
+            else 
+            {
+                return "File Not Found";
+            }
+            return id;
+
+        }
+       
     }
 }
