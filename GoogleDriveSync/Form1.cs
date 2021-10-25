@@ -46,29 +46,29 @@ namespace GoogleDriveSync
                 ApplicationName = ApplicationName,
             });
 
-            //var watcher = new FileSystemWatcher(@"D:\LiveRepReportsWithSSIS\SBS\LocalDrive");
+            var watcher = new FileSystemWatcher(@"E:\work\LocalDrive");
 
-            //watcher.NotifyFilter = NotifyFilters.Attributes
-            //                     | NotifyFilters.CreationTime
-            //                     | NotifyFilters.DirectoryName
-            //                     | NotifyFilters.FileName
-            //                     | NotifyFilters.LastAccess
-            //                     | NotifyFilters.LastWrite
-            //                     | NotifyFilters.Security
-            //                     | NotifyFilters.Size;
+            watcher.NotifyFilter = NotifyFilters.Attributes
+                                 | NotifyFilters.CreationTime
+                                 | NotifyFilters.DirectoryName
+                                 | NotifyFilters.FileName
+                                 | NotifyFilters.LastAccess
+                                 | NotifyFilters.LastWrite
+                                 | NotifyFilters.Security
+                                 | NotifyFilters.Size;
 
-            //watcher.Changed += OnChanged;
-            //watcher.Created += OnCreated;
-            //watcher.Deleted += OnDeleted;
-            //watcher.Renamed += OnRenamed;
+            watcher.Changed += OnChanged;
+            watcher.Created += OnCreated;
+            watcher.Deleted += OnDeleted;
+            watcher.Renamed += OnRenamed;
 
 
 
-            //watcher.IncludeSubdirectories = true;
-            //watcher.EnableRaisingEvents = true;
+            watcher.IncludeSubdirectories = true;
+            watcher.EnableRaisingEvents = true;
 
-            //Console.WriteLine("Press enter to exit.");
-            //Console.ReadLine();
+            Console.WriteLine("Press enter to exit.");
+            Console.ReadLine();
 
 
 
@@ -102,32 +102,157 @@ namespace GoogleDriveSync
                
                 return;
             }
+           
             Console.WriteLine($"Changed: {e.FullPath}");
             FileAttributes attr = System.IO.File.GetAttributes(e.FullPath);
             //detect whether its a directory or file
-            if ((attr & FileAttributes.Directory) != FileAttributes.Directory)
+            String foldername = Path.GetFileName(e.FullPath);
+            List<String> parents = getperants(e.FullPath);  
+
+            if (parents.Count > 1)
             {
-                 
-                uploadFile(service, e.FullPath, getperants(e.FullPath)[0]);
+                for (int i = parents.Count; i-- > 0;)
+                {
+                    if (i == 0)
+                        break;
+                    if (!listfilesfromfolder(parents[i]).Contains(parents[i - 1]))
+                    {
+                        createnewfolder(service, parents[i-1], parents[i]);
+                    }
+
+                }
+            }
+            if (!listfilesfromfolder(getperants(e.FullPath)[0]).Contains(foldername))
+            {
+
+                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                {
+                    createnewfolder(service, foldername, getperants(e.FullPath)[0]);
+
+                }
+                else
+                {
+                    uploadFile(service, e.FullPath, getperants(e.FullPath)[0]);
+
+
+                }
             }
 
 
-        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                //if (getperants(e.FullPath).Count > 1)
+                //{
+
+                //    if (!listfilesfromfolder(getperants(e.FullPath)[1]).Contains(getperants(e.FullPath)[0]))
+                //    {
+                //        createnewfolder(service, getperants(e.FullPath)[0], getperants(e.FullPath)[1]);
+                //    }
+
+                //    if (!listfilesfromfolder(getperants(e.FullPath)[0]).Contains(foldername))
+                //    {
+
+                //        if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                //        {
+                //            createnewfolder(service, foldername, getperants(e.FullPath)[0]);
+
+                //        }
+                //        else
+                //        {
+                //            uploadFile(service, e.FullPath, getperants(e.FullPath)[0]);
+
+                //        }
+
+                //    }
+
+
+                //}
+                //else
+                //{
+                //    if (!listfilesfromfolder(getperants(e.FullPath)[0]).Contains(foldername))
+                //    {
+                //        if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                //        {
+                //            createnewfolder(service, foldername, getperants(e.FullPath)[0]);
+
+                //        }
+                //        else
+                //        {
+                //            uploadFile(service, e.FullPath, getperants(e.FullPath)[0]);
+
+                //        }
+                //    }
+
+                //}
+            }
 
         private  void OnCreated(object sender, FileSystemEventArgs e)
         {
             string value = $"Created: {e.FullPath}";
             Console.WriteLine(value);
-            //get the file attributes for file or directory
-            FileAttributes attr = System.IO.File.GetAttributes(e.FullPath);
-            //detect whether its a directory or file
-            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+            String foldername = Path.GetFileName(e.FullPath);
+            if (!listfilesfromfolder(getperants(e.FullPath)[0]).Contains(foldername))
             {
-                createnewfolder(service, e.FullPath, getperants(e.FullPath)[0]);
-                Console.WriteLine(getperants(e.FullPath)[0]);
+                //get the file attributes for file or directory
+                
+                FileAttributes attr = System.IO.File.GetAttributes(e.FullPath);
+                //detect whether its a directory or file
+                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                {
+
+
+                    createnewfolder(service, foldername, getperants(e.FullPath)[0]);
+
+
+                }
+                else
+                {
+
+                    uploadFile(service, e.FullPath, getperants(e.FullPath)[0]);
+                }
             }
-            else
-                uploadFile(service, e.FullPath, getperants(e.FullPath)[0]);
+                
 
 
             // uploadFile(service, e.FullPath ,getperants(e.FullPath)[0]);
@@ -150,13 +275,13 @@ namespace GoogleDriveSync
 
 
 
-        public void createnewfolder(DriveService service, string _uploadFile , String parentfolder)
+        public void createnewfolder(DriveService service, string Filename , String parentfolder)
         {
 
             String id = getfolderid(parentfolder);
 
             Google.Apis.Drive.v3.Data.File FileMetaData = new Google.Apis.Drive.v3.Data.File();
-            FileMetaData.Name = System.IO.Path.GetFileName(_uploadFile);
+            FileMetaData.Name = Filename;
             FileMetaData.MimeType = "application/vnd.google-apps.folder" ;
             FileMetaData.Parents = new List<string>
                 {
@@ -237,7 +362,8 @@ namespace GoogleDriveSync
         public UserCredential GetCardianlities()
         {
             UserCredential credential;
-            string[] Scopes = {DriveService.Scope.Drive, DriveService.Scope.DriveFile};
+            string[] Scopes = {DriveService.Scope.Drive, DriveService.Scope.DriveFile,DriveService.Scope.DriveMetadata,DriveService.Scope.DriveAppdata,DriveService.Scope.DriveScripts
+            };
             using (var stream = new FileStream("client_secret.json", FileMode.Open, FileAccess.ReadWrite))
             {
 
@@ -368,9 +494,9 @@ namespace GoogleDriveSync
             while (true)
             {
                 di = di.Parent;
-                if (di.Name == "SBS")
+                if (di.Name == "work")
                 {
-                   
+
                     break;
                 }
                 perants.Add(di.Name);
@@ -434,6 +560,28 @@ namespace GoogleDriveSync
             return id;
 
         }
+
+
+
+
+
+
+
+
+
+
+        //void UpdateOldFile(String NewFilePath , String OldFileName) 
+        //{
+        //    Google.Apis.Drive.v3.Data.File updatedFileMetadata = new Google.Apis.Drive.v3.Data.File();
+        //    updatedFileMetadata.Name = Path.GetFileName(NewFilePath); ;
+        //    FilesResource.UpdateMediaUpload updateRequest;
+        //    string fileId = getfolderid(OldFileName);
+        //    using (var stream = new FileStream(NewFilePath, FileMode.OpenOrCreate))
+        //    {
+        //        updateRequest = service.Files.Update(updatedFileMetadata, fileId, stream );
+        //        updateRequest.Upload();
+        //    };
+        //}
        
     }
 }
