@@ -1,5 +1,4 @@
 D:\LiveRepReportsWithSSIS\Git\GoogleDiveSync\GoogleDriveSync\obj\Debug\GoogleDriveSync.csprojAssemblyReference.cache
-D:\LiveRepReportsWithSSIS\Git\GoogleDiveSync\GoogleDriveSync\obj\Debug\GoogleDriveSync.Form1.resources
 D:\LiveRepReportsWithSSIS\Git\GoogleDiveSync\GoogleDriveSync\obj\Debug\GoogleDriveSync.Properties.Resources.resources
 D:\LiveRepReportsWithSSIS\Git\GoogleDiveSync\GoogleDriveSync\obj\Debug\GoogleDriveSync.csproj.GenerateResource.cache
 D:\LiveRepReportsWithSSIS\Git\GoogleDiveSync\GoogleDriveSync\obj\Debug\GoogleDriveSync.csproj.CoreCompileInputs.cache
@@ -52,3 +51,4 @@ E:\work\System\GoogleDiveSync\GoogleDriveSync\obj\Debug\GoogleDriveSync.csproj.C
 E:\work\System\GoogleDiveSync\GoogleDriveSync\obj\Debug\GoogleDriveSync.csproj.CopyComplete
 E:\work\System\GoogleDiveSync\GoogleDriveSync\obj\Debug\GoogleDriveSync.exe
 E:\work\System\GoogleDiveSync\GoogleDriveSync\obj\Debug\GoogleDriveSync.pdb
+D:\LiveRepReportsWithSSIS\Git\GoogleDiveSync\GoogleDriveSync\obj\Debug\GoogleDriveSync.GoogleDriveSync.resources
