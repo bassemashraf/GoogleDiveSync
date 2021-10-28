@@ -110,8 +110,6 @@ namespace GoogleDriveSync
       
             if (!ListFilesFromFolder(GetParentsFolders(e.FullPath)[0]).Contains(foldername))
             {
-            
-                FileAttributes attr = System.IO.File.GetAttributes(e.FullPath);
                 //detect whether its a directory or file
                 if (IsFolder(e.FullPath))
                 {
@@ -311,14 +309,23 @@ namespace GoogleDriveSync
 
                 }
             }
-
-
         }
 
 
 
+        private string MapPathFromDriveTOLocal(IList<String> Parents , String   FileName)
+        {
+            
+            String LocalFilePath = @"D:\LiveRepReportsWithSSIS\SBS\" ;
+            List<String> reversepath = Enumerable.Reverse(Parents).ToList();
+            foreach (String name in reversepath) 
+            {
+                LocalFilePath = LocalFilePath + name +@"\" ;
+            }
+            LocalFilePath = LocalFilePath + FileName; 
+            return LocalFilePath;
+        }
 
-       
 
 
 
@@ -326,12 +333,11 @@ namespace GoogleDriveSync
         private string GetFileId(string path)
         {
             
-            
             String FileName = Path.GetFileName(path);
             String MimeType = GetMimeType(FileName);
             FilesResource.ListRequest listRequest = Service.Files.List();
             listRequest.Q = "mimeType = '" + MimeType + "' and name = '" + FileName + "'";
-            listRequest.Fields = "nextPageToken, files(id, name,parents)";
+            listRequest.Fields = "nextPageToken, files(id, name)";
             IList<Google.Apis.Drive.v3.Data.File> files = listRequest.Execute()
             .Files;
             String id = "";
@@ -374,24 +380,45 @@ namespace GoogleDriveSync
 
         }
 
+
+
+
+
+
+
         private void StartDriveWatcherButton_Click(object sender, EventArgs e)
         {
             var response = Service.Changes.GetStartPageToken().Execute();
             Console.WriteLine("Start token: " + response.StartPageTokenValue);
 
             string pageToken = response.StartPageTokenValue;
+
             while (pageToken != null)
             {
                 var request = Service.Changes.List(pageToken);
                 request.Spaces = "Drive";
                 request.Fields = "*";
+                request.PageSize = 100;
+               
                 var changes = request.Execute();
+                string[] filePaths = Directory.GetFiles(@"D:\LiveRepReportsWithSSIS\SBS\LocalDrive");
                 foreach (var change in changes.Changes)
                 {
-                    if (change.File.Parents.Contains(GetFolderId("LocalDrive")))
-                        Console.WriteLine("ana fe localdrive");
-                   
-                    //DownloadFile(Service, change.File, @"D:\LiveRepReportsWithSSIS\SBS\LocalDrive\" + change.File.Parents.ToString() + change.File.Name);
+                    IList<string> p = GetALLParents(change.File.Name);
+                    // String Pa = GetOneParent("LocalDrive");
+                    //List < String > realparents = Listaprent(change.File.Id);
+                    if (p.Contains("LocalDrive"))
+                    {
+              
+                        Console.WriteLine("localdrive");
+                        String SaveTo = MapPathFromDriveTOLocal(p, change.File.Name);
+                        if(!Directory.Exists(SaveTo) && change.File.MimeType== "application/vnd.google-apps.folder")
+                            Directory.CreateDirectory(SaveTo);
+                        else 
+                            DownloadFile(Service, change.File, SaveTo);
+
+                    }
+
                 }
                 if (changes.NewStartPageToken != null)
                 {
@@ -400,91 +427,78 @@ namespace GoogleDriveSync
 
                 }
                 pageToken = changes.NextPageToken;
+            }
+        }
 
 
+        private void DownloadFile(Google.Apis.Drive.v3.DriveService service, Google.Apis.Drive.v3.Data.File file, string saveTo)
+        {
+
+            var request = service.Files.Get(file.Id);
+            var stream = new System.IO.MemoryStream();
+
+            // Add a handler which will be notified on progress changes.
+            // It will notify on each chunk download and when the
+            // download is completed or failed.
+    
+            SaveStream(stream, saveTo);
+          
+            request.Download(stream);
+
+        }
+        private static void SaveStream(System.IO.MemoryStream stream, string saveTo)
+        {
+            using (System.IO.FileStream file = new System.IO.FileStream(saveTo, System.IO.FileMode.Create, System.IO.FileAccess.Write))
+            {
+                stream.WriteTo(file);
             }
         }
 
 
 
-        // The Way From Google Drive To Local Not Completed
+        private string GetOneParent(string filename)
+        {
+            FilesResource.ListRequest listRequest = Service.Files.List();
+            listRequest.Q = "trashed = false AND name = '" + filename +"'";
+            listRequest.Fields = "*";
 
-        //private void StartDriveWatcherButton_Click(object sender, EventArgs e)
-        //{
-        //    var response = Service.Changes.GetStartPageToken().Execute();
-        //    Console.WriteLine("Start token: " + response.StartPageTokenValue);
 
-        //    string pageToken = response.StartPageTokenValue;
-        //    while (pageToken != null)
-        //    {
-        //        var request = Service.Changes.List(pageToken);
-        //        request.Spaces = "1aNidvO2hxTqsSN - _7QKYz4CAZTdTJ3Kd";
-        //        var changes = request.Execute();
-        //        foreach (var change in changes.Changes)
-        //        {
-        //            // Process change
-        //            //listBox1.Items.Add("Change found for file: " + change.File.Name.ToString());
-        //            Console.WriteLine("Change found for file: " + change.File);
-        //            Console.WriteLine("Change found for file: " + change.File.Parents[0]);
-        //            Console.WriteLine("Change found for file: " + change.Type + "for " + change.File.Name);
-        //            //DownloadFile(Service, change.File, @"D:\LiveRepReportsWithSSIS\SBS\LocalDrive\" + change.File.Parents.ToString() + change.File.Name);
-        //        }
-        //        if (changes.NewStartPageToken != null)
-        //        {
-        //            // Last page, save this token for the next polling interval
-        //            pageToken = changes.NewStartPageToken;
+             string Parent = null;
+            IList<Google.Apis.Drive.v3.Data.File> files = listRequest.Execute()
+            .Files;
 
-        //        }
-        //        pageToken = changes.NextPageToken;
-
-        //    }
-
-        //}
+            if (files != null && files.Count > 0)
+            {
+                foreach (var file in files)
+                {
+                    Parent = file.Parents[0];
+                }
+            }
+            else
+            {
+                return Parent;
+            }
+            return Parent;
+        }
 
 
 
+        private List<string> GetALLParents(string filename)
+        {
+            List<string> Parents = new List<string>();
+            String NextParentId = " ";
+            while (filename != "LocalDrive")
+            {
+                NextParentId = GetOneParent(filename);
+                filename = Service.Files.Get(NextParentId).Execute().Name;
+                Parents.Add(filename);
+                
+            }
+            return Parents;
+        }
 
-        //private void DownloadFile(Google.Apis.Drive.v3.DriveService service, Google.Apis.Drive.v3.Data.File file, string saveTo)
-        //{
 
-        //    var request = service.Files.Get(file.Id);
-        //    var stream = new System.IO.MemoryStream();
 
-        //    // Add a handler which will be notified on progress changes.
-        //    // It will notify on each chunk download and when the
-        //    // download is completed or failed.
-        //    request.MediaDownloader.ProgressChanged += (Google.Apis.Download.IDownloadProgress progress) =>
-        //    {
-        //        switch (progress.Status)
-        //        {
-        //            case Google.Apis.Download.DownloadStatus.Downloading:
-        //                {
-        //                    Console.WriteLine(progress.BytesDownloaded);
-        //                    break;
-        //                }
-        //            case Google.Apis.Download.DownloadStatus.Completed:
-        //                {
-        //                    Console.WriteLine("Download complete.");
-        //                    SaveStream(stream, saveTo);
-        //                    break;
-        //                }
-        //            case Google.Apis.Download.DownloadStatus.Failed:
-        //                {
-        //                    Console.WriteLine("Download failed.");
-        //                    break;
-        //                }
-        //        }
-        //    };
-        //    request.Download(stream);
-
-        //}
-        //private static void SaveStream(System.IO.MemoryStream stream, string saveTo)
-        //{
-        //    using (System.IO.FileStream file = new System.IO.FileStream(saveTo, System.IO.FileMode.Create, System.IO.FileAccess.Write))
-        //    {
-        //        stream.WriteTo(file);
-        //    }
-        //}
 
 
 

@@ -52,3 +52,6 @@ E:\work\System\GoogleDiveSync\GoogleDriveSync\obj\Debug\GoogleDriveSync.csproj.C
 E:\work\System\GoogleDiveSync\GoogleDriveSync\obj\Debug\GoogleDriveSync.exe
 E:\work\System\GoogleDiveSync\GoogleDriveSync\obj\Debug\GoogleDriveSync.pdb
 D:\LiveRepReportsWithSSIS\Git\GoogleDiveSync\GoogleDriveSync\obj\Debug\GoogleDriveSync.GoogleDriveSync.resources
+D:\LiveRepReportsWithSSIS\Git\GoogleDiveSync\GoogleDriveSync\bin\Debug\Google.Apis.Drive.v2.dll
+D:\LiveRepReportsWithSSIS\Git\GoogleDiveSync\GoogleDriveSync\bin\Debug\Google.Apis.Drive.v2.pdb
+D:\LiveRepReportsWithSSIS\Git\GoogleDiveSync\GoogleDriveSync\bin\Debug\Google.Apis.Drive.v2.xml
