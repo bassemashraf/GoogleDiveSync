@@ -195,14 +195,13 @@ namespace GoogleDriveSync
             };
             using (var stream = new FileStream("client_secret.json", FileMode.Open, FileAccess.ReadWrite))
             {
-
                 string credPath = "token.json";
                 credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
                     GoogleClientSecrets.FromStream(stream).Secrets, Scopes,
                     "user",
                     CancellationToken.None,
                     new FileDataStore(credPath, true)).Result;
-                Console.WriteLine(credential);
+              
 
             }
             return credential;
@@ -259,9 +258,7 @@ namespace GoogleDriveSync
                 }
             }
             else
-            {
                 return folders;
-            }
 
             return folders;
         }
@@ -306,23 +303,20 @@ namespace GoogleDriveSync
                     {
                         CreateNewFolder(Service, Parents[i - 1], Parents[i]);
                     }
-
                 }
             }
         }
 
 
 
-        private string MapPathFromDriveTOLocal(IList<String> Parents , String   FileName)
-        {
-            
+        private string MapPathFromDriveTOLocal(IList<String> Parents)
+        {            
             String LocalFilePath = @"D:\LiveRepReportsWithSSIS\SBS\" ;
             List<String> reversepath = Enumerable.Reverse(Parents).ToList();
             foreach (String name in reversepath) 
             {
                 LocalFilePath = LocalFilePath + name +@"\" ;
-            }
-            LocalFilePath = LocalFilePath + FileName; 
+            } 
             return LocalFilePath;
         }
 
@@ -346,7 +340,7 @@ namespace GoogleDriveSync
                 foreach (var file in files)
                 {
                     id = file.Id;
-                    Console.WriteLine(file.Parents[0]);
+                    
                 }
             }
             return id;
@@ -381,15 +375,10 @@ namespace GoogleDriveSync
         }
 
 
-
-
-
-
-
         private void StartDriveWatcherButton_Click(object sender, EventArgs e)
         {
             var response = Service.Changes.GetStartPageToken().Execute();
-            Console.WriteLine("Start token: " + response.StartPageTokenValue);
+           
 
             string pageToken = response.StartPageTokenValue;
 
@@ -404,36 +393,59 @@ namespace GoogleDriveSync
                 string[] filePaths = Directory.GetFiles(@"D:\LiveRepReportsWithSSIS\SBS\LocalDrive");
                 foreach (var change in changes.Changes)
                 {
-                    IList<string> p = GetALLParents(change.File.Name);
-                    // String Pa = GetOneParent("LocalDrive");
-                    //List < String > realparents = Listaprent(change.File.Id);
-                    if (p.Contains("LocalDrive"))
+                    if (change.Removed == false)
                     {
-              
-                        Console.WriteLine("localdrive");
-                        String SaveTo = MapPathFromDriveTOLocal(p, change.File.Name);
-                        if(!Directory.Exists(SaveTo) && change.File.MimeType== "application/vnd.google-apps.folder")
-                            Directory.CreateDirectory(SaveTo);
-                        else 
-                            DownloadFile(Service, change.File, SaveTo);
+                        IList<string> ParentsList = GetALLParents(change.File.Name);
+                        if (ParentsList.Contains("LocalDrive"))
+                        {
+
+                            String SaveTo = MapPathFromDriveTOLocal(ParentsList);
+                            //Create Missed Folders
+                            if (!Directory.Exists(SaveTo))
+                                Directory.CreateDirectory(SaveTo);
+                            //Handle If file Edited Or Added
+                            if (System.IO.File.Exists(SaveTo + change.File.Name) && change.File.MimeType != "application/vnd.google-apps.folder")
+                            {
+                                System.IO.File.Delete(SaveTo + change.File.OriginalFilename);
+                                DownloadFile(Service, change.File, SaveTo + change.File.Name);
+                            }
+                            else if (change.File.MimeType != "application/vnd.google-apps.folder")
+                            {
+                                DownloadFile(Service, change.File, SaveTo + change.File.Name);
+
+                            }
+
+
+                            //Handle Rename Files
+                            if (change.File.OriginalFilename != null && change.File.Name != change.File.OriginalFilename)
+                            {
+                                System.IO.File.Delete(SaveTo + change.File.OriginalFilename);
+                                DownloadFile(Service, change.File, SaveTo + change.File.Name);
+                            }
+
+                            //Handle If Folder Added OR File 
+                            if (!Directory.Exists(SaveTo + change.File.Name) && change.File.MimeType == "application/vnd.google-apps.folder")
+                                Directory.CreateDirectory(SaveTo + change.File.Name);
+
+
+
+                        }
 
                     }
+                    if (changes.NewStartPageToken != null)
+                    {
+                        // Last page, save this token for the next polling interval
+                        pageToken = changes.NewStartPageToken;
 
+                    }
+                    pageToken = changes.NextPageToken;
                 }
-                if (changes.NewStartPageToken != null)
-                {
-                    // Last page, save this token for the next polling interval
-                    pageToken = changes.NewStartPageToken;
-
-                }
-                pageToken = changes.NextPageToken;
             }
         }
 
 
         private void DownloadFile(Google.Apis.Drive.v3.DriveService service, Google.Apis.Drive.v3.Data.File file, string saveTo)
         {
-
             var request = service.Files.Get(file.Id);
             var stream = new System.IO.MemoryStream();
 
