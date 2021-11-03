@@ -6,7 +6,31 @@ using System.Threading.Tasks;
 
 namespace GoogleDriveSync
 {
-    class LocalToCloudSync
+    public    class  LocalToCloudSync : AbSync
     {
+        public override void UpdateFile()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void DeleteFile()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void CreateFolder()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void DeleteFolder()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Start()
+        {
+        }
+
     }
 }

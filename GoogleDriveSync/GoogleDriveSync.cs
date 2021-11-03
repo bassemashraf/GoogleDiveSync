@@ -362,7 +362,7 @@ namespace GoogleDriveSync
         //Way 2 From Drive To Local
         private void StartDriveWatcherButton_Click(object sender, EventArgs e)
         {
-            var lastToken = ConfigManager.GetConfigs("LastToken");
+            var lastToken = "";
             while (true)
             {
                 var response = Service.Changes.GetStartPageToken().Execute();
@@ -370,7 +370,7 @@ namespace GoogleDriveSync
                 if (lastToken != pageToken)
                 {
                     lastToken = pageToken;
-                    ConfigManager.UpdateConfigs("LastToken", lastToken);
+                   // ConfigManager.UpdateConfigs("LastToken", lastToken);
 
                     var request = Service.Changes.List(pageToken);
                     request.Spaces = "Drive";
@@ -536,110 +536,5 @@ namespace GoogleDriveSync
 
             //logger.Log("DONE DeleteLocalFile {0}", filename);
         }
-    }
-}
-
-
-public abstract class AbSync
-{
-    public abstract void UpdateFile();
-
-    public abstract void DeleteFile();
-
-    public abstract void CreateFolder();
-
-    public abstract void DeleteFolder();
-
-    public abstract void Start();
-}
-
-public class CloudToLocalSync : AbSync
-{
-    public override void UpdateFile()
-    {
-        throw new NotImplementedException();
-    }
-
-    public override void DeleteFile()
-    {
-        throw new NotImplementedException();
-    }
-
-    public override void CreateFolder()
-    {
-        throw new NotImplementedException();
-    }
-
-    public override void DeleteFolder()
-    {
-        throw new NotImplementedException();
-    }
-
-    public override void Start()
-    {
-    }
-}
-
-
-public class LocalToCloudSync : AbSync
-{
-    public override void UpdateFile()
-    {
-        throw new NotImplementedException();
-    }
-
-    public override void DeleteFile()
-    {
-        throw new NotImplementedException();
-    }
-
-    public override void CreateFolder()
-    {
-        throw new NotImplementedException();
-    }
-
-    public override void DeleteFolder()
-    {
-        throw new NotImplementedException();
-    }
-
-    public override void Start()
-    {
-        //logger.Log("StartSync Ended");
-    }
-}
-
-public class ConfigManager
-{
-    public static void UpdateConfigs(string key, string value)
-    {
-        var confFile = ".\\conf.cnf";
-        System.IO.File.AppendAllLines(confFile, new string[] { string.Format("{0}: {1}", key, value) });
-    }
-
-    public static string GetConfigs(string key)
-    {
-        var confFile = ".\\conf.cnf";
-        var lines = System.IO.File.ReadAllLines(confFile);
-        if (lines != null)
-        {
-            var fm = string.Format("{0}: ", key);
-            var val = lines.FirstOrDefault(p => p.StartsWith(fm));
-            return val;
-        }
-        return null;
-    }
-}
-
-public class SyncManager
-{
-    public void StartSync()
-    {
-        // logger.Log("StartSync Started");
-        var cloudToLocalSync = new CloudToLocalSync();
-        cloudToLocalSync.Start();
-        var localToCloudSync = new LocalToCloudSync();
-        cloudToLocalSync.Start();
-        //logger.Log("StartSync Ended");
     }
 }
