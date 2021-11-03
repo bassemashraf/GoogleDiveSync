@@ -30,12 +30,12 @@ namespace GoogleDriveSync
         static string ApplicationName = "GoogleDriveSync";
 
         String LocalFilePath = ConfigurationManager.AppSettings.Get("LocalFilePath").ToString();
-        String WayOneAdd =ConfigurationManager.AppSettings.Get("WayOneAdd").ToString();
-        String WayOneEdit=ConfigurationManager.AppSettings.Get("WayOneEdit").ToString();
-        String WayOneDelete=ConfigurationManager.AppSettings.Get("WayOneDelete").ToString();
-        String WayTwoAdd=ConfigurationManager.AppSettings.Get("WayTwoAdd").ToString();
-        String WayTwoEdit=ConfigurationManager.AppSettings.Get("WayTwoEdit").ToString();
-        String WayTwoDelete=ConfigurationManager.AppSettings.Get("WayTwoDelete").ToString();
+        String WayOneAdd = ConfigurationManager.AppSettings.Get("WayOneAdd").ToString();
+        String WayOneEdit = ConfigurationManager.AppSettings.Get("WayOneEdit").ToString();
+        String WayOneDelete = ConfigurationManager.AppSettings.Get("WayOneDelete").ToString();
+        String WayTwoAdd = ConfigurationManager.AppSettings.Get("WayTwoAdd").ToString();
+        String WayTwoEdit = ConfigurationManager.AppSettings.Get("WayTwoEdit").ToString();
+        String WayTwoDelete = ConfigurationManager.AppSettings.Get("WayTwoDelete").ToString();
         String DriveFolderName = ConfigurationManager.AppSettings.Get("DriveFolderName").ToString();
         String PathBeforeLocalFolder = ConfigurationManager.AppSettings.Get("PathBeforeLocalFolder").ToString();
 
@@ -44,7 +44,7 @@ namespace GoogleDriveSync
         public GoogleDriveSync()
         {
             InitializeComponent();
-            
+
         }
         public static UserCredential GetCardianlities()
         {
@@ -63,9 +63,15 @@ namespace GoogleDriveSync
             return credential;
         }
 
+
+
         private void StartLocalFileWatcherButton_Click(object sender, EventArgs e)
         {
-           
+            //------------------------------------
+            // Get All Files & Folders in the local Folder
+            // Upload to Google Folder
+
+            //--------------------------------------
             var watcher = new FileSystemWatcher(LocalFilePath); //Path of Local Folder  Which Sync with Drive 
 
             watcher.NotifyFilter = NotifyFilters.Attributes
@@ -88,9 +94,12 @@ namespace GoogleDriveSync
             watcher.EnableRaisingEvents = true;
 
         }
+
+
         private void OnChanged(object sender, FileSystemEventArgs e)
         {
-            if (e.ChangeType != WatcherChangeTypes.Changed){
+            if (e.ChangeType != WatcherChangeTypes.Changed)
+            {
                 return;
             }
             if (Directory.Exists(e.FullPath))
@@ -104,7 +113,7 @@ namespace GoogleDriveSync
                 {
                     if (IsFolder(e.FullPath))
                     {
-                        if(WayOneAdd=="enable")
+                        if (WayOneAdd == "enable")
                             CreateNewFolder(Service, FolderName, GetParentsFolders(e.FullPath)[0]);
                     }
                     else
@@ -160,7 +169,7 @@ namespace GoogleDriveSync
                 }
             }
         }
-           
+
 
         private void OnRenamed(object sender, RenamedEventArgs e)
 
@@ -197,19 +206,22 @@ namespace GoogleDriveSync
                 {
                   ID
                 };
-            try{
+            try
+            {
                 var stream = new System.IO.FileStream(_uploadFile, System.IO.FileMode.Open);
                 var request = service.Files.Create(body, stream, GetMimeType(_uploadFile));
                 // request.Fields = "*";
                 var result = request.Upload();
                 stream.Close();
-            }catch (Exception e){
+            }
+            catch (Exception e)
+            {
                 Console.WriteLine(e.Message);
             }
         }
 
 
-      
+
 
 
         private string GetMimeType(string fileName)
@@ -309,7 +321,7 @@ namespace GoogleDriveSync
             }
             else
                 return id;
-            
+
             return id;
         }
 
@@ -337,78 +349,86 @@ namespace GoogleDriveSync
 
         private bool IsFolder(String path)
         {
-                FileAttributes attr = System.IO.File.GetAttributes(path);
-                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
-                    return true;
-                else
-                    return false;
+            FileAttributes attr = System.IO.File.GetAttributes(path);
+            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                return true;
+            else
+                return false;
         }
 
 
-     
+
 
         //Way 2 From Drive To Local
         private void StartDriveWatcherButton_Click(object sender, EventArgs e)
         {
-            var response = Service.Changes.GetStartPageToken().Execute();
-            string pageToken = response.StartPageTokenValue;
-            while (pageToken != null)
+            var lastToken = ConfigManager.GetConfigs("LastToken");
+            while (true)
             {
-                var request = Service.Changes.List(pageToken);
-                request.Spaces = "Drive";
-                request.Fields = "*";
-                request.PageSize = 100;
-                var changes = request.Execute();
-                foreach (var change in changes.Changes)
+                var response = Service.Changes.GetStartPageToken().Execute();
+                var pageToken = response.StartPageTokenValue;
+                if (lastToken != pageToken)
                 {
-                    if (change.File is null || change.Removed == true) 
+                    lastToken = pageToken;
+                    ConfigManager.UpdateConfigs("LastToken", lastToken);
+
+                    var request = Service.Changes.List(pageToken);
+                    request.Spaces = "Drive";
+                    request.Fields = "*";
+                    request.PageSize = 100;
+                    var changes = request.Execute();
+                    foreach (var change in changes.Changes)
                     {
-                        continue;
-                    }
-                    if (change.File.Trashed == false && !(change.File  is  null))
-                    {
-                        IList<string> ParentsList = GetALLParents(change.File.Name);
-                        if (ParentsList.Contains(DriveFolderName))
+                        if (change.File is null || change.Removed == true)
                         {
-                            String SaveTo = MapPathFromDriveTOLocal(ParentsList);
-                            //Create Missed Folders
-                            if (!Directory.Exists(SaveTo) && WayTwoAdd == "enable")
-                                Directory.CreateDirectory(SaveTo);
-                            //Handle If file Edited Or Added
-
-                            if (System.IO.File.Exists(SaveTo + change.File.Name) && change.File.MimeType != "application/vnd.google-apps.folder" && WayTwoEdit =="enable")
-                            {
-                                System.IO.File.Delete(SaveTo + change.File.OriginalFilename);
-                                DownloadFile(Service, change.File, SaveTo + change.File.Name);
-                            }
-                            else if (change.File.MimeType != "application/vnd.google-apps.folder" && WayTwoAdd=="enable")
-                            {
-                                DownloadFile(Service, change.File, SaveTo + change.File.Name);
-                            }
-                            //Handle Rename Files
-
-                            if (change.File.OriginalFilename != null && change.File.Name != change.File.OriginalFilename && WayTwoEdit == "enable")
-                            {
-                                System.IO.File.Delete(SaveTo + change.File.OriginalFilename);
-                                DownloadFile(Service, change.File, SaveTo + change.File.Name);
-                            }
-                            //Handle If Folder Added OR File 
-                            if (!Directory.Exists(SaveTo + change.File.Name) && change.File.MimeType == "application/vnd.google-apps.folder" && WayTwoAdd=="enable")
-                                Directory.CreateDirectory(SaveTo + change.File.Name);
+                            continue;
                         }
+                        if (change.File.Trashed == false && !(change.File is null))
+                        {
+                            IList<string> ParentsList = GetALLParents(change.File.Name);
+                            if (ParentsList.Contains(DriveFolderName))
+                            {
+                                String SaveTo = MapPathFromDriveTOLocal(ParentsList);
+                                //Create Missed Folders
+                                if (!Directory.Exists(SaveTo) && WayTwoAdd == "enable")
+                                    Directory.CreateDirectory(SaveTo);
+                                //Handle If file Edited Or Added
+
+                                if (System.IO.File.Exists(SaveTo + change.File.Name) && change.File.MimeType != "application/vnd.google-apps.folder" && WayTwoEdit == "enable")
+                                {
+                                    System.IO.File.Delete(SaveTo + change.File.OriginalFilename);
+                                    DownloadFile(Service, change.File, SaveTo + change.File.Name);
+                                }
+                                else if (change.File.MimeType != "application/vnd.google-apps.folder" && WayTwoAdd == "enable")
+                                {
+                                    DownloadFile(Service, change.File, SaveTo + change.File.Name);
+                                }
+                                //Handle Rename Files
+
+                                if (change.File.OriginalFilename != null && change.File.Name != change.File.OriginalFilename && WayTwoEdit == "enable")
+                                {
+                                    System.IO.File.Delete(SaveTo + change.File.OriginalFilename);
+                                    DownloadFile(Service, change.File, SaveTo + change.File.Name);
+                                }
+                                //Handle If Folder Added OR File 
+                                if (!Directory.Exists(SaveTo + change.File.Name) && change.File.MimeType == "application/vnd.google-apps.folder" && WayTwoAdd == "enable")
+                                    Directory.CreateDirectory(SaveTo + change.File.Name);
+                            }
+                        }
+                        else
+                        {
+                            if (WayTwoDelete == "enable")
+                                DeleteLocalFile(change.File.Name);
+                        }
+                        if (changes.NewStartPageToken != null)
+                        {
+                            // Last page, save this token for the next polling interval
+                            pageToken = changes.NewStartPageToken;
+                        }
+                        pageToken = changes.NextPageToken;
                     }
-                    else 
-                    {
-                        if(WayTwoDelete == "enable")
-                            DeleteLocalFile(change.File.Name);
-                    }
-                    if (changes.NewStartPageToken != null)
-                    {
-                        // Last page, save this token for the next polling interval
-                        pageToken = changes.NewStartPageToken;
-                    }
-                    pageToken = changes.NextPageToken;
                 }
+                Thread.Sleep(10000);
             }
         }
 
@@ -429,7 +449,7 @@ namespace GoogleDriveSync
                         }
                     case Google.Apis.Download.DownloadStatus.Completed:
                         {
-                           
+
                             using (System.IO.FileStream Lfile = new System.IO.FileStream(saveTo, System.IO.FileMode.Create, System.IO.FileAccess.Write))
                             {
                                 jetStream.WriteTo(Lfile);
@@ -438,7 +458,7 @@ namespace GoogleDriveSync
                         }
                     case Google.Apis.Download.DownloadStatus.Failed:
                         {
-                           
+
                             break;
                         }
                 }
@@ -450,9 +470,9 @@ namespace GoogleDriveSync
         private string GetOneParent(string filename)
         {
             FilesResource.ListRequest listRequest = Service.Files.List();
-            listRequest.Q = "trashed = false AND name = '" + filename +"'";
+            listRequest.Q = "trashed = false AND name = '" + filename + "'";
             listRequest.Fields = "*";
-             string Parent = null;
+            string Parent = null;
             IList<Google.Apis.Drive.v3.Data.File> files = listRequest.Execute()
             .Files;
             if (files != null && files.Count > 0)
@@ -490,26 +510,136 @@ namespace GoogleDriveSync
                 NextParentId = GetOneParent(filename);
                 filename = Service.Files.Get(NextParentId).Execute().Name;
                 Parents.Add(filename);
-                
+
             }
             return Parents;
         }
 
         private void DeleteLocalFile(String filename)
         {
-            String  sDir = LocalFilePath; 
+            //logger.Log("DeleteLocalFile {0}", filename);
+            String sDir = LocalFilePath;
             string[] files = Directory.GetFiles(sDir, filename, SearchOption.AllDirectories);
             string[] directors = Directory.GetDirectories(sDir, filename, SearchOption.AllDirectories);
-            try{
-                try{
+            try
+            {
+                if (files.Length > 0)
                     System.IO.File.Delete(files[0]);
-                }catch{
+                if (directors.Length > 0)
                     Directory.Delete(directors[0]);
-                }
-            }catch {
-                Console.WriteLine("File Not Created Before"); 
             }
-           
+            catch(Exception ex)
+            {
+                //logger.error(ex, "DeleteLocalFile {0}", filename);
+                Console.WriteLine("File Not Created Before");
+            }
+
+            //logger.Log("DONE DeleteLocalFile {0}", filename);
         }
+    }
+}
+
+
+public abstract class AbSync
+{
+    public abstract void UpdateFile();
+
+    public abstract void DeleteFile();
+
+    public abstract void CreateFolder();
+
+    public abstract void DeleteFolder();
+
+    public abstract void Start();
+}
+
+public class CloudToLocalSync : AbSync
+{
+    public override void UpdateFile()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void DeleteFile()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void CreateFolder()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void DeleteFolder()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void Start()
+    {
+    }
+}
+
+
+public class LocalToCloudSync : AbSync
+{
+    public override void UpdateFile()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void DeleteFile()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void CreateFolder()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void DeleteFolder()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void Start()
+    {
+        //logger.Log("StartSync Ended");
+    }
+}
+
+public class ConfigManager
+{
+    public static void UpdateConfigs(string key, string value)
+    {
+        var confFile = ".\\conf.cnf";
+        System.IO.File.AppendAllLines(confFile, new string[] { string.Format("{0}: {1}", key, value) });
+    }
+
+    public static string GetConfigs(string key)
+    {
+        var confFile = ".\\conf.cnf";
+        var lines = System.IO.File.ReadAllLines(confFile);
+        if (lines != null)
+        {
+            var fm = string.Format("{0}: ", key);
+            var val = lines.FirstOrDefault(p => p.StartsWith(fm));
+            return val;
+        }
+        return null;
+    }
+}
+
+public class SyncManager
+{
+    public void StartSync()
+    {
+        // logger.Log("StartSync Started");
+        var cloudToLocalSync = new CloudToLocalSync();
+        cloudToLocalSync.Start();
+        var localToCloudSync = new LocalToCloudSync();
+        cloudToLocalSync.Start();
+        //logger.Log("StartSync Ended");
     }
 }

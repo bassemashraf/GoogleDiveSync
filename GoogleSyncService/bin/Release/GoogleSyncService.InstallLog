@@ -1,0 +1,13 @@
+﻿Installing assembly 'D:\LiveRepReportsWithSSIS\Git\GoogleDiveSync\GoogleSyncService\bin\Release\GoogleSyncService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\LiveRepReportsWithSSIS\Git\GoogleDiveSync\GoogleSyncService\bin\Release\GoogleSyncService.InstallLog
+   assemblypath = D:\LiveRepReportsWithSSIS\Git\GoogleDiveSync\GoogleSyncService\bin\Release\GoogleSyncService.exe
+Installing service DriveSync...
+Service DriveSync has been successfully installed.
+Creating EventLog source DriveSync in log Application...
+Committing assembly 'D:\LiveRepReportsWithSSIS\Git\GoogleDiveSync\GoogleSyncService\bin\Release\GoogleSyncService.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\LiveRepReportsWithSSIS\Git\GoogleDiveSync\GoogleSyncService\bin\Release\GoogleSyncService.InstallLog
+   assemblypath = D:\LiveRepReportsWithSSIS\Git\GoogleDiveSync\GoogleSyncService\bin\Release\GoogleSyncService.exe

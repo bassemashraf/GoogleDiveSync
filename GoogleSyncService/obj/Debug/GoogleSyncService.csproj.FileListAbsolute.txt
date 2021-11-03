@@ -1,0 +1,9 @@
+D:\LiveRepReportsWithSSIS\Git\GoogleDiveSync\GoogleSyncService\bin\Debug\GoogleSyncService.exe.config
+D:\LiveRepReportsWithSSIS\Git\GoogleDiveSync\GoogleSyncService\bin\Debug\GoogleSyncService.exe
+D:\LiveRepReportsWithSSIS\Git\GoogleDiveSync\GoogleSyncService\bin\Debug\GoogleSyncService.pdb
+D:\LiveRepReportsWithSSIS\Git\GoogleDiveSync\GoogleSyncService\obj\Debug\GoogleSyncService.csprojAssemblyReference.cache
+D:\LiveRepReportsWithSSIS\Git\GoogleDiveSync\GoogleSyncService\obj\Debug\GoogleSyncService.csproj.CoreCompileInputs.cache
+D:\LiveRepReportsWithSSIS\Git\GoogleDiveSync\GoogleSyncService\obj\Debug\GoogleSyncService.exe
+D:\LiveRepReportsWithSSIS\Git\GoogleDiveSync\GoogleSyncService\obj\Debug\GoogleSyncService.pdb
+D:\LiveRepReportsWithSSIS\Git\GoogleDiveSync\GoogleSyncService\obj\Debug\GoogleSyncService.ProjectInstaller.resources
+D:\LiveRepReportsWithSSIS\Git\GoogleDiveSync\GoogleSyncService\obj\Debug\GoogleSyncService.csproj.GenerateResource.cache
