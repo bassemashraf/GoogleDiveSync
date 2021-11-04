@@ -529,6 +529,7 @@ namespace GoogleDriveSync
                     Directory.Delete(directors[0]);
             }
             catch(Exception ex)
+
             {
                 //logger.error(ex, "DeleteLocalFile {0}", filename);
                 Console.WriteLine("File Not Created Before");
