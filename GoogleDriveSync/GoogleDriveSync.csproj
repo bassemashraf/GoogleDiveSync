@@ -87,6 +87,8 @@
     <Compile Include="GoogleDriveSync.Designer.cs">
       <DependentUpon>GoogleDriveSync.cs</DependentUpon>
     </Compile>
+    <Compile Include="HelperMethods.cs" />
+    <Compile Include="LocalFileWatcher.cs" />
     <Compile Include="LocalToCloudSync.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

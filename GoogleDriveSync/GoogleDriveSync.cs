@@ -46,7 +46,7 @@ namespace GoogleDriveSync
             InitializeComponent();
 
         }
-        public static UserCredential GetCardianlities()
+        public static UserCredential GetCardianlities()  /// passed to helper 
         {
             UserCredential credential;
             string[] Scopes = {DriveService.Scope.Drive, DriveService.Scope.DriveFile,DriveService.Scope.DriveMetadata,DriveService.Scope.DriveAppdata,DriveService.Scope.DriveScripts
@@ -104,11 +104,10 @@ namespace GoogleDriveSync
             }
             if (Directory.Exists(e.FullPath))
             {
-                //detect whether its a directory or file
                 String FolderName = Path.GetFileName(e.FullPath);
                 List<String> Parents = GetParentsFolders(e.FullPath);
                 if (WayOneAdd == "enable")
-                    CreateNotFoundFolders(e.FullPath);
+                     CreateNotFoundFolders(e.FullPath);
                 if (!ListFilesFromFolder(Parents[0]).Contains(FolderName))
                 {
                     if (IsFolder(e.FullPath))
@@ -224,7 +223,7 @@ namespace GoogleDriveSync
 
 
 
-        private string GetMimeType(string fileName)
+        private string GetMimeType(string fileName)   /// passed to helper 
         {
             string mimeType = "application /unknown";
             string ext = System.IO.Path.GetExtension(fileName).ToLower();
@@ -249,7 +248,7 @@ namespace GoogleDriveSync
                 perants.Add(di.Name);
             }
             return perants;
-        }
+        }  /// passed to helper 
 
 
         private List<string> ListFilesFromFolder(String foldername)
@@ -272,7 +271,7 @@ namespace GoogleDriveSync
                 return folders;
 
             return folders;
-        }
+        }/// passed to helper 
         private void CreateNotFoundFolders(String filepath)
         {
             List<String> Parents = GetParentsFolders(filepath);
@@ -289,7 +288,7 @@ namespace GoogleDriveSync
                     }
                 }
             }
-        }
+        }/// passed to helper 
 
         void UpdateOldFile(String NewFilePath, String OldFilePath)
         {
@@ -303,7 +302,7 @@ namespace GoogleDriveSync
                 fileId = GetFileId(OldFilePath);
             updateRequest = Service.Files.Update(updatedFileMetadata, fileId);
             updateRequest.Execute();
-        }
+        }// passed to helper 
         private string GetFolderId(string foldername)
         {
             FilesResource.ListRequest listRequest = Service.Files.List();
@@ -323,7 +322,7 @@ namespace GoogleDriveSync
                 return id;
 
             return id;
-        }
+        }// passed to helper 
 
 
         private string GetFileId(string path)
@@ -345,7 +344,7 @@ namespace GoogleDriveSync
                 }
             }
             return id;
-        }
+        }// passed to helper 
 
         private bool IsFolder(String path)
         {
@@ -354,7 +353,7 @@ namespace GoogleDriveSync
                 return true;
             else
                 return false;
-        }
+        }// passed to helper 
 
 
 
