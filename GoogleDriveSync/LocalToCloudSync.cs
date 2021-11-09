@@ -33,7 +33,25 @@ namespace GoogleDriveSync
 
         public override void Start()
         {
-     
+            //string[] AllFiles = Directory.GetFiles(ConfigManager.LocalFilePath, "*.*", SearchOption.AllDirectories);
+            //foreach (var FilePath in AllFiles)
+            //{
+
+            //    FileInfo Info = new FileInfo(FilePath);
+            //    Google.Apis.Drive.v3.Data.File DriveFile = HelperMethods.GetFileWithName(Service, FilePath);
+            //    if (DriveFile != null)
+            //    {
+            //        if (Info.LastWriteTime.Date < DriveFile.ModifiedTime)
+            //            LocalFileChanged(FilePath);
+            //    }
+            //    else
+            //        LocalFileChanged(FilePath);
+            //}
+
+
+        }
+
+
 
     }
 }

@@ -15,22 +15,7 @@ namespace GoogleDriveSync
 {
     class HelperMethods
     {
-        public static UserCredential GetCardianlities()
-        {
-            UserCredential credential;
-            string[] Scopes = {DriveService.Scope.Drive, DriveService.Scope.DriveFile,DriveService.Scope.DriveMetadata,DriveService.Scope.DriveAppdata,DriveService.Scope.DriveScripts
-            };
-            using (var stream = new FileStream("client_secret.json", FileMode.Open, FileAccess.ReadWrite))
-            {
-                string credPath = "token.json";
-                credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
-                    GoogleClientSecrets.FromStream(stream).Secrets, Scopes,
-                    "user",
-                    CancellationToken.None,
-                    new FileDataStore(credPath, true)).Result;
-            }
-            return credential;
-        }
+        
 
 
         public   static string GetMimeType(string fileName)
@@ -163,6 +148,7 @@ namespace GoogleDriveSync
             else
                 return false;
         }
+
         public static  void CreateNewFolder(DriveService Service, String filename, String parentfolder)
         {
             String ID = GetFolderId(Service,parentfolder);
@@ -178,8 +164,88 @@ namespace GoogleDriveSync
             request.Fields = "id";
             var file = request.Execute();
         }
+        public static Google.Apis.Drive.v3.Data.File GetFileWithName(DriveService Service, string path)
+        {
+            String FileName = Path.GetFileName(path);
+            String MimeType = GetMimeType(FileName);
+            FilesResource.ListRequest listRequest = Service.Files.List();
+            listRequest.Q = "mimeType = '" + MimeType + "' and name = '" + FileName + "'";
+            listRequest.Fields = "*";
+            IList<Google.Apis.Drive.v3.Data.File> files = listRequest.Execute()
+            .Files;
+            Google.Apis.Drive.v3.Data.File drivefile = null;
+            if (files != null && files.Count > 0)
+            {
+                foreach (var file in files)
+                {
+                    drivefile = file;
+                   
+                }
+            }
+            return drivefile;
 
 
+        }
+        public static void  StartLocalFileWatcher() 
+        {
+            var watcher = new FileSystemWatcher(LocalFilePath); //Path of Local Folder  Which Sync with Drive 
+
+            watcher.NotifyFilter = NotifyFilters.Attributes
+                                 | NotifyFilters.CreationTime
+                                 | NotifyFilters.DirectoryName
+                                 | NotifyFilters.FileName
+                                 | NotifyFilters.LastAccess
+                                 | NotifyFilters.LastWrite
+                                 | NotifyFilters.Security
+                                 | NotifyFilters.Size;
+
+            watcher.Changed += OnChanged;
+            watcher.Created += OnCreated;
+            watcher.Deleted += OnDeleted;
+            watcher.Renamed += OnRenamed;
+
+
+
+            watcher.IncludeSubdirectories = true;
+            watcher.EnableRaisingEvents = true;
+
+        }
+
+
+
+
+        public void UploadLocalFileChanged(DriveService Service ,  String FilePath)
+
+        {
+
+            String FolderName = Path.GetFileName(FilePath);
+            List<String> Parents = GetParentsFolders(FilePath);
+            if (ConfigManager.WayOneAdd == "enable")
+                CreateNotFoundFolders(Service,FilePath);
+            if (!ListFilesFromFolder(Service,Parents[0]).Contains(FolderName))
+            {
+                if (IsFolder(FilePath))
+                {
+                    if (ConfigManager.WayOneAdd == "enable")
+                        CreateNewFolder(Service, FolderName, GetParentsFolders(FilePath)[0]);
+                }
+                else
+                {
+                    if (ConfigManager.WayOneAdd == "enable")
+                        UploadFile(Service, FilePath, GetParentsFolders(FilePath)[0]);
+                }
+            }
+            else
+            {
+                if (!IsFolder(FilePath))
+                {
+                    if (WayOneEdit == "enable")
+                        UpdateOldFile(FilePath, FolderName);
+                }
+            }
+
+
+        }
 
 
     }

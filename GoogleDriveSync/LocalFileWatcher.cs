@@ -9,22 +9,5 @@ namespace GoogleDriveSync
     class LocalFileWatcher
     {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 }

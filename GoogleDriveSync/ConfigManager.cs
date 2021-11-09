@@ -9,8 +9,6 @@ namespace GoogleDriveSync
 {
     class ConfigManager
     {
-
-
       public static   String LocalFilePath = ConfigurationManager.AppSettings.Get("LocalFilePath").ToString();
       public static   String WayOneAdd = ConfigurationManager.AppSettings.Get("WayOneAdd").ToString();
       public static   String WayOneEdit = ConfigurationManager.AppSettings.Get("WayOneEdit").ToString();
@@ -20,6 +18,7 @@ namespace GoogleDriveSync
       public static   String WayTwoDelete = ConfigurationManager.AppSettings.Get("WayTwoDelete").ToString();
       public static   String DriveFolderName = ConfigurationManager.AppSettings.Get("DriveFolderName").ToString();
       public static   String PathBeforeLocalFolder = ConfigurationManager.AppSettings.Get("PathBeforeLocalFolder").ToString();
+      public static String CardinalitiesPath = ConfigurationManager.AppSettings.Get("CardinalitiesPath").ToString();
         public static void UpdateConfigs(string key, string value)
         {
             var confFile = ".\\conf.cnf";

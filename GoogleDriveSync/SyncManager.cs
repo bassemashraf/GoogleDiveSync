@@ -11,7 +11,7 @@ namespace GoogleDriveSync
         public void StartSync()
         {
             // logger.Log("StartSync Started");
-            var cloudToLocalSync = new CloudToLocalSync();
+            var CloudToLocalSync = new CloudToLocalSync();
             cloudToLocalSync.Start();
             var localToCloudSync = new LocalToCloudSync();
             cloudToLocalSync.Start();

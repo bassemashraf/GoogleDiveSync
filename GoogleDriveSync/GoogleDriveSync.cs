@@ -21,13 +21,7 @@ namespace GoogleDriveSync
 {
     public partial class GoogleDriveSync : Form
     {
-        static UserCredential Credential = GetCardianlities();
-        DriveService Service = new DriveService(new BaseClientService.Initializer
-        {
-            HttpClientInitializer = Credential,
-            ApplicationName = ApplicationName,
-        });
-        static string ApplicationName = "GoogleDriveSync";
+        DriveService Service = DriveConnect.Service;
 
         String LocalFilePath = ConfigurationManager.AppSettings.Get("LocalFilePath").ToString();
         String WayOneAdd = ConfigurationManager.AppSettings.Get("WayOneAdd").ToString();
@@ -44,23 +38,6 @@ namespace GoogleDriveSync
         public GoogleDriveSync()
         {
             InitializeComponent();
-
-        }
-        public static UserCredential GetCardianlities()  /// passed to helper 
-        {
-            UserCredential credential;
-            string[] Scopes = {DriveService.Scope.Drive, DriveService.Scope.DriveFile,DriveService.Scope.DriveMetadata,DriveService.Scope.DriveAppdata,DriveService.Scope.DriveScripts
-            };
-            using (var stream = new FileStream("client_secret.json", FileMode.Open, FileAccess.ReadWrite))
-            {
-                string credPath = "token.json";
-                credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
-                    GoogleClientSecrets.FromStream(stream).Secrets, Scopes,
-                    "user",
-                    CancellationToken.None,
-                    new FileDataStore(credPath, true)).Result;
-            }
-            return credential;
         }
 
 
@@ -93,7 +70,13 @@ namespace GoogleDriveSync
             watcher.IncludeSubdirectories = true;
             watcher.EnableRaisingEvents = true;
 
+
+
         }
+
+
+
+
 
 
         private void OnChanged(object sender, FileSystemEventArgs e)
@@ -102,56 +85,70 @@ namespace GoogleDriveSync
             {
                 return;
             }
-            if (Directory.Exists(e.FullPath))
+
+            UploadLocalFileChanged(e.FullPath);
+        }
+
+
+        public void UploadLocalFileChanged(String FilePath)
+
+        {
+
+            String FolderName = Path.GetFileName(FilePath);
+            List<String> Parents = GetParentsFolders(FilePath);
+            if (WayOneAdd == "enable")
+                CreateNotFoundFolders(FilePath);
+            if (!ListFilesFromFolder(Parents[0]).Contains(FolderName))
             {
-                String FolderName = Path.GetFileName(e.FullPath);
-                List<String> Parents = GetParentsFolders(e.FullPath);
-                if (WayOneAdd == "enable")
-                     CreateNotFoundFolders(e.FullPath);
-                if (!ListFilesFromFolder(Parents[0]).Contains(FolderName))
+                if (IsFolder(FilePath))
                 {
-                    if (IsFolder(e.FullPath))
-                    {
-                        if (WayOneAdd == "enable")
-                            CreateNewFolder(Service, FolderName, GetParentsFolders(e.FullPath)[0]);
-                    }
-                    else
-                    {
-                        if (WayOneAdd == "enable")
-                            UploadFile(Service, e.FullPath, GetParentsFolders(e.FullPath)[0]);
-                    }
+                    if (WayOneAdd == "enable")
+                        CreateNewFolder(Service, FolderName, GetParentsFolders(FilePath)[0]);
                 }
                 else
                 {
-                    if (!IsFolder(e.FullPath))
-                    {
-                        if (WayOneEdit == "enable")
-                            UpdateOldFile(e.FullPath, FolderName);
-                    }
+                    if (WayOneAdd == "enable")
+                        UploadFile(Service, FilePath, GetParentsFolders(FilePath)[0]);
                 }
             }
+            else
+            {
+                if (!IsFolder(FilePath))
+                {
+                    if (WayOneEdit == "enable")
+                        UpdateOldFile(FilePath, FolderName);
+                }
+            }
+
+
         }
 
 
         private void OnCreated(object sender, FileSystemEventArgs e)
         {
+            LocalNewFileCreated(e.FullPath);
+        }
+        public void LocalNewFileCreated(String FilePath) 
+        {
+
             if (WayOneAdd == "enable")
             {
-                String foldername = Path.GetFileName(e.FullPath);
+                String foldername = Path.GetFileName(FilePath);
 
-                if (!ListFilesFromFolder(GetParentsFolders(e.FullPath)[0]).Contains(foldername))
+                if (!ListFilesFromFolder(GetParentsFolders(FilePath)[0]).Contains(foldername))
                 {
                     //detect whether its a directory or file
-                    if (IsFolder(e.FullPath))
+                    if (IsFolder(FilePath))
                     {
-                        CreateNewFolder(Service, foldername, GetParentsFolders(e.FullPath)[0]);
+                        CreateNewFolder(Service, foldername, GetParentsFolders(FilePath)[0]);
                     }
                     else
                     {
-                        UploadFile(Service, e.FullPath, GetParentsFolders(e.FullPath)[0]);
+                        UploadFile(Service, FilePath, GetParentsFolders(FilePath)[0]);
                     }
                 }
             }
+
         }
 
         private void OnDeleted(object sender, FileSystemEventArgs e)
@@ -295,13 +292,16 @@ namespace GoogleDriveSync
             String fileId = "";
             Google.Apis.Drive.v3.Data.File updatedFileMetadata = new Google.Apis.Drive.v3.Data.File();
             updatedFileMetadata.Name = Path.GetFileName(NewFilePath);
-            FilesResource.UpdateRequest updateRequest;
+            byte[] byteArray = System.IO.File.ReadAllBytes(NewFilePath);
+            String ContetnType = GetMimeType(NewFilePath);
+            System.IO.MemoryStream stream = new System.IO.MemoryStream(byteArray);
+            FilesResource.UpdateMediaUpload updateRequest;
             if (IsFolder(NewFilePath))
                 fileId = GetFolderId(Path.GetFileName(OldFilePath));
             else
                 fileId = GetFileId(OldFilePath);
-            updateRequest = Service.Files.Update(updatedFileMetadata, fileId);
-            updateRequest.Execute();
+            updateRequest = Service.Files.Update(updatedFileMetadata,fileId,stream,ContetnType);
+            updateRequest.Upload();
         }// passed to helper 
         private string GetFolderId(string foldername)
         {
@@ -530,8 +530,9 @@ namespace GoogleDriveSync
             catch(Exception ex)
 
             {
+               
                 //logger.error(ex, "DeleteLocalFile {0}", filename);
-                Console.WriteLine("File Not Created Before");
+                Console.WriteLine(ex.Message);
             }
 
             //logger.Log("DONE DeleteLocalFile {0}", filename);
