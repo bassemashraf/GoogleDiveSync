@@ -12,9 +12,9 @@ namespace GoogleDriveSync
         {
             // logger.Log("StartSync Started");
             var CloudToLocalSync = new CloudToLocalSync();
-            cloudToLocalSync.Start();
+            //cloudToLocalSync.Start();
             var localToCloudSync = new LocalToCloudSync();
-            cloudToLocalSync.Start();
+            //cloudToLocalSync.Start();
             //logger.Log("StartSync Ended");
         }
     }

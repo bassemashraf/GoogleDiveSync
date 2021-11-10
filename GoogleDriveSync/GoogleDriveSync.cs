@@ -15,14 +15,13 @@ using Google.Apis.Services;
 using Google.Apis.Util.Store;
 using System.Threading;
 using System.Configuration;
-
-
+using NLog;
 namespace GoogleDriveSync
 {
     public partial class GoogleDriveSync : Form
     {
         DriveService Service = DriveConnect.Service;
-
+        
         String LocalFilePath = ConfigurationManager.AppSettings.Get("LocalFilePath").ToString();
         String WayOneAdd = ConfigurationManager.AppSettings.Get("WayOneAdd").ToString();
         String WayOneEdit = ConfigurationManager.AppSettings.Get("WayOneEdit").ToString();
@@ -32,13 +31,14 @@ namespace GoogleDriveSync
         String WayTwoDelete = ConfigurationManager.AppSettings.Get("WayTwoDelete").ToString();
         String DriveFolderName = ConfigurationManager.AppSettings.Get("DriveFolderName").ToString();
         String PathBeforeLocalFolder = ConfigurationManager.AppSettings.Get("PathBeforeLocalFolder").ToString();
-
+        
 
 
         public GoogleDriveSync()
         {
             InitializeComponent();
-        }
+            
+    }
 
 
 
@@ -85,7 +85,7 @@ namespace GoogleDriveSync
             {
                 return;
             }
-
+            //logger.Error("error");
             UploadLocalFileChanged(e.FullPath);
         }
 
@@ -128,7 +128,7 @@ namespace GoogleDriveSync
         {
             LocalNewFileCreated(e.FullPath);
         }
-        public void LocalNewFileCreated(String FilePath) 
+        public void LocalNewFileCreated(String FilePath)
         {
 
             if (WayOneAdd == "enable")
@@ -165,6 +165,10 @@ namespace GoogleDriveSync
                 }
             }
         }
+
+
+
+
 
 
         private void OnRenamed(object sender, RenamedEventArgs e)
@@ -215,8 +219,6 @@ namespace GoogleDriveSync
                 Console.WriteLine(e.Message);
             }
         }
-
-
 
 
 
@@ -300,7 +302,7 @@ namespace GoogleDriveSync
                 fileId = GetFolderId(Path.GetFileName(OldFilePath));
             else
                 fileId = GetFileId(OldFilePath);
-            updateRequest = Service.Files.Update(updatedFileMetadata,fileId,stream,ContetnType);
+            updateRequest = Service.Files.Update(updatedFileMetadata, fileId, stream, ContetnType);
             updateRequest.Upload();
         }// passed to helper 
         private string GetFolderId(string foldername)
@@ -361,20 +363,20 @@ namespace GoogleDriveSync
         //Way 2 From Drive To Local
         private void StartDriveWatcherButton_Click(object sender, EventArgs e)
         {
-            var lastToken = "";
+            var lastToken = ConfigManager.GetConfigs("LastToken");
             while (true)
             {
+                
                 var response = Service.Changes.GetStartPageToken().Execute();
                 var pageToken = response.StartPageTokenValue;
                 if (lastToken != pageToken)
                 {
-                    lastToken = pageToken;
-                   // ConfigManager.UpdateConfigs("LastToken", lastToken);
 
-                    var request = Service.Changes.List(pageToken);
+                    ConfigManager.UpdateConfigs("LastToken", lastToken);
+                    var request = Service.Changes.List(lastToken);
+                    lastToken = pageToken;
                     request.Spaces = "Drive";
                     request.Fields = "*";
-                    request.PageSize = 100;
                     var changes = request.Execute();
                     foreach (var change in changes.Changes)
                     {
@@ -432,7 +434,7 @@ namespace GoogleDriveSync
         }
 
 
-        private void DownloadFile(Google.Apis.Drive.v3.DriveService service, Google.Apis.Drive.v3.Data.File file, string saveTo)
+        private void DownloadFile(DriveService service, Google.Apis.Drive.v3.Data.File file, string saveTo)
         {
             var jetStream = new System.IO.MemoryStream();
             FilesResource.GetRequest request = new FilesResource.GetRequest(service, file.Id);
@@ -527,10 +529,9 @@ namespace GoogleDriveSync
                 if (directors.Length > 0)
                     Directory.Delete(directors[0]);
             }
-            catch(Exception ex)
+            catch (Exception ex)
 
             {
-               
                 //logger.error(ex, "DeleteLocalFile {0}", filename);
                 Console.WriteLine(ex.Message);
             }
