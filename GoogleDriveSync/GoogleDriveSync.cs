@@ -49,26 +49,27 @@ namespace GoogleDriveSync
             // Upload to Google Folder
 
             //--------------------------------------
-            var watcher = new FileSystemWatcher(LocalFilePath); //Path of Local Folder  Which Sync with Drive 
+            //var watcher = new FileSystemWatcher(LocalFilePath); //Path of Local Folder  Which Sync with Drive 
 
-            watcher.NotifyFilter = NotifyFilters.Attributes
-                                 | NotifyFilters.CreationTime
-                                 | NotifyFilters.DirectoryName
-                                 | NotifyFilters.FileName
-                                 | NotifyFilters.LastAccess
-                                 | NotifyFilters.LastWrite
-                                 | NotifyFilters.Security
-                                 | NotifyFilters.Size;
+            //watcher.NotifyFilter = NotifyFilters.Attributes
+            //                     | NotifyFilters.CreationTime
+            //                     | NotifyFilters.DirectoryName
+            //                     | NotifyFilters.FileName
+            //                     | NotifyFilters.LastAccess
+            //                     | NotifyFilters.LastWrite
+            //                     | NotifyFilters.Security
+            //                     | NotifyFilters.Size;
 
-            watcher.Changed += OnChanged;
-            watcher.Created += OnCreated;
-            watcher.Deleted += OnDeleted;
-            watcher.Renamed += OnRenamed;
+            //watcher.Changed += OnChanged;
+            //watcher.Created += OnCreated;
+            //watcher.Deleted += OnDeleted;
+            //watcher.Renamed += OnRenamed;
 
 
 
-            watcher.IncludeSubdirectories = true;
-            watcher.EnableRaisingEvents = true;
+            //watcher.IncludeSubdirectories = true;
+            //watcher.EnableRaisingEvents = true;
+            LocalToCloudSync.StartSync(DriveConnect.Service);
 
 
 

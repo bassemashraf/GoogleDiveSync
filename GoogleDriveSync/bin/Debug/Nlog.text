@@ -2,3 +2,50 @@
 2021-11-10 15:43:22.5909|ERROR|GoogleDriveSync.GoogleDriveSync|error
 2021-11-10 15:43:22.5909|ERROR|GoogleDriveSync.GoogleDriveSync|error
 2021-11-10 15:43:29.0141|ERROR|GoogleDriveSync.GoogleDriveSync|error
+2021-11-14 13:02:21.7132|ERROR|GoogleDriveSync.ConfigManager|Error:"invalid_grant", Description:"Token has been expired or revoked.", Uri:""
+2021-11-14 13:02:22.1900|ERROR|GoogleDriveSync.ConfigManager|Error:"invalid_grant", Description:"Token has been expired or revoked.", Uri:""  Function Name 'GetFolderId'
+2021-11-14 13:02:22.5143|ERROR|GoogleDriveSync.ConfigManager|Error:"invalid_grant", Description:"Token has been expired or revoked.", Uri:""  Function Name 'ListFilesFromFolder'
+2021-11-14 13:02:22.8257|ERROR|GoogleDriveSync.ConfigManager|Error:"invalid_grant", Description:"Token has been expired or revoked.", Uri:""  Function Name 'GetFolderId'
+2021-11-14 13:02:23.1936|INFO|GoogleDriveSync.ConfigManager|File01206211747.txtUploaded
+2021-11-14 13:03:07.5146|ERROR|GoogleDriveSync.ConfigManager|Error:"invalid_grant", Description:"Token has been expired or revoked.", Uri:""
+2021-11-14 13:03:07.8045|ERROR|GoogleDriveSync.ConfigManager|Error:"invalid_grant", Description:"Token has been expired or revoked.", Uri:""  Function Name 'GetFolderId'
+2021-11-14 13:03:08.0975|ERROR|GoogleDriveSync.ConfigManager|Error:"invalid_grant", Description:"Token has been expired or revoked.", Uri:""  Function Name 'ListFilesFromFolder'
+2021-11-14 13:03:08.4027|ERROR|GoogleDriveSync.ConfigManager|Error:"invalid_grant", Description:"Token has been expired or revoked.", Uri:""  Function Name 'GetFolderId'
+2021-11-14 13:03:08.7282|INFO|GoogleDriveSync.ConfigManager|File01206211747.txtUploaded
+2021-11-14 13:04:10.7357|INFO|GoogleDriveSync.ConfigManager|File01206211747.txtUploaded
+2021-11-14 13:44:26.6403|INFO|GoogleDriveSync.ConfigManager|File01206211747.txtUpdated
+2021-11-14 13:44:42.1405|INFO|GoogleDriveSync.ConfigManager|File01206211747.txtUpdated
+2021-11-14 13:44:50.7282|ERROR|GoogleDriveSync.ConfigManager|The process cannot access the file 'D:\LiveRepReportsWithSSIS\SBS\LocalDrive\jjlmnug.txt' because it is being used by another process. Function Name UploadFile
+2021-11-14 13:44:51.6174|INFO|GoogleDriveSync.ConfigManager|Filejjlmnug.txtUploaded
+2021-11-14 13:44:53.1609|INFO|GoogleDriveSync.ConfigManager|Filejjlmnug.txtUploaded
+2021-11-14 13:44:53.4243|INFO|GoogleDriveSync.ConfigManager|Filejjlmnug.txtUpdated
+2021-11-14 13:45:12.8681|ERROR|GoogleDriveSync.ConfigManager|The process cannot access the file 'D:\LiveRepReportsWithSSIS\SBS\LocalDrive\BAssememememem.txt' because it is being used by another process. Function Name UploadFile
+2021-11-14 13:45:13.6437|INFO|GoogleDriveSync.ConfigManager|FileBAssememememem.txtUploaded
+2021-11-14 13:45:14.9935|INFO|GoogleDriveSync.ConfigManager|FileBAssememememem.txtUploaded
+2021-11-14 13:45:15.3472|INFO|GoogleDriveSync.ConfigManager|FileBAssememememem.txtUpdated
+2021-11-14 13:45:16.2884|INFO|GoogleDriveSync.ConfigManager|FileBAssememememem.txtUpdated
+2021-11-14 13:45:16.7499|INFO|GoogleDriveSync.ConfigManager|FileBAssememememem.txtUpdated
+2021-11-14 13:45:17.6511|INFO|GoogleDriveSync.ConfigManager|FileBAssememememem.txtUpdated
+2021-11-14 13:45:18.0679|INFO|GoogleDriveSync.ConfigManager|FileBAssememememem.txtUpdated
+2021-11-14 13:45:42.7218|INFO|GoogleDriveSync.ConfigManager|File01206211747.txtUpdated
+2021-11-14 13:46:57.6362|INFO|GoogleDriveSync.ConfigManager|File01206211747.txtUpdated
+2021-11-14 13:46:59.4234|INFO|GoogleDriveSync.ConfigManager|FileBAssememememem.txtUpdated
+2021-11-14 13:47:01.2499|INFO|GoogleDriveSync.ConfigManager|Filejjlmnug.txtUpdated
+2021-11-14 13:47:54.5689|ERROR|GoogleDriveSync.ConfigManager|The process cannot access the file 'D:\LiveRepReportsWithSSIS\SBS\LocalDrive\bgfb.txt' because it is being used by another process. Function Name UploadFile
+2021-11-14 13:48:11.9204|ERROR|GoogleDriveSync.ConfigManager|The process cannot access the file 'D:\LiveRepReportsWithSSIS\SBS\LocalDrive\bgfb.txt' because it is being used by another process. Function Name UploadFile
+2021-11-14 13:48:17.6360|INFO|GoogleDriveSync.ConfigManager|Filebgfb.txtUploaded
+2021-11-14 13:48:18.9116|INFO|GoogleDriveSync.ConfigManager|Filebgfb.txtUpdated
+2021-11-14 13:48:20.1968|INFO|GoogleDriveSync.ConfigManager|Filebgfb.txtUpdated
+2021-11-14 13:48:20.5889|INFO|GoogleDriveSync.ConfigManager|Filebgfb.txtUpdated
+2021-11-14 13:48:41.9695|ERROR|GoogleDriveSync.ConfigManager|The process cannot access the file 'D:\LiveRepReportsWithSSIS\SBS\LocalDrive\NLog.xml' because it is being used by another process. Function Name UploadFile
+2021-11-14 13:48:42.1614|ERROR|GoogleDriveSync.ConfigManager|The process cannot access the file 'D:\LiveRepReportsWithSSIS\SBS\LocalDrive\NLog.xml' because it is being used by another process. Function Name UploadFile
+2021-11-14 13:48:43.5668|ERROR|GoogleDriveSync.ConfigManager|The process cannot access the file 'D:\LiveRepReportsWithSSIS\SBS\LocalDrive\NLog.xml' because it is being used by another process. Function Name UploadFile
+2021-11-14 13:48:43.7706|ERROR|GoogleDriveSync.ConfigManager|The process cannot access the file 'D:\LiveRepReportsWithSSIS\SBS\LocalDrive\NLog.xml' because it is being used by another process. Function Name UploadFile
+2021-11-14 13:48:45.0331|ERROR|GoogleDriveSync.ConfigManager|The process cannot access the file 'D:\LiveRepReportsWithSSIS\SBS\LocalDrive\NLog.xml' because it is being used by another process. Function Name UploadFile
+2021-11-14 13:48:45.3540|ERROR|GoogleDriveSync.ConfigManager|The process cannot access the file 'D:\LiveRepReportsWithSSIS\SBS\LocalDrive\NLog.xml' because it is being used by another process. Function Name UploadFile
+2021-11-14 13:48:46.5248|ERROR|GoogleDriveSync.ConfigManager|The process cannot access the file 'D:\LiveRepReportsWithSSIS\SBS\LocalDrive\NLog.xml' because it is being used by another process. Function Name UploadFile
+2021-11-14 13:48:46.7506|ERROR|GoogleDriveSync.ConfigManager|The process cannot access the file 'D:\LiveRepReportsWithSSIS\SBS\LocalDrive\NLog.xml' because it is being used by another process. Function Name UploadFile
+2021-11-14 13:48:49.0663|INFO|GoogleDriveSync.ConfigManager|FileNLog.xmlUploaded
+2021-11-14 13:48:50.5580|INFO|GoogleDriveSync.ConfigManager|FileNLog.xmlUpdated
+2021-11-14 13:48:52.0504|INFO|GoogleDriveSync.ConfigManager|FileNLog.xmlUpdated
+2021-11-14 13:48:53.6083|INFO|GoogleDriveSync.ConfigManager|FileNLog.xmlUpdated
